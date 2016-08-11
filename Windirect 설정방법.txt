@@ -1,0 +1,15 @@
+windirect 사용법
+
+설치한 WinDivert의 폴더에서 amd64파일안에 있는
+WinDivert.dll과 .sys를 프로젝트의 Debug 폴더 안에 넣는다.
+
+비주얼 스튜디오에서 개발환경을 x64로 바꾼다.
+
+C/C++ -> 추가 포함 디렉토리에 
+D:\WinDivert-1.1.8-MSVC\WinDivert-1.1.8-MSVC\include 추가
+링커 -> 일반에서 추가 라이브러리 디렉터리에 
+D:\WinDivert-1.1.8-MSVC\WinDivert-1.1.8-MSVC\amd64 추가
+
+링커 -> 출력에서 추가 종속성에 ws2_32.lib, WinDivert.lib 추가
+
+구성 속성 -> 디버깅에서 명령 인수에 mal_site.txt 추가
