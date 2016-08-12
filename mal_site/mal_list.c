@@ -98,7 +98,7 @@ static BOOL BlackListMatch(PBLACKLIST blacklist, PURL url);
 static void BlackListRead(PBLACKLIST blacklist, const char *filename);
 static BOOL BlackListPayloadMatch(PBLACKLIST blacklist, char *data,
 	UINT16 len);
-void refine_mal_site_list();		// site ¸®½ºÆ® Á¤Á¦ ÇÔ¼ö
+void refine_mal_site_list();		// site ë¦¬ìŠ¤íŠ¸ ì •ì œ í•¨ìˆ˜
 
 									/*
 									* Entry.
@@ -122,8 +122,7 @@ int __cdecl main(int argc, char **argv)
 	PBLACKLIST blacklist;
 	unsigned i;
 	INT16 priority = 404;       // Arbitrary.
-								// À¯ÇØ»çÀÌÆ® ¸®½ºÆ®µé Á¤Á¦ÇÔ
-	refine_mal_site_list();
+								// ìœ í•´ì‚¬ì´íŠ¸ ë¦¬ìŠ¤íŠ¸ë“¤ ì •ì œí•¨
 	// Read the blacklists.
 
 	if (argc <= 1)
@@ -132,7 +131,8 @@ int __cdecl main(int argc, char **argv)
 			argv[0]);
 		exit(EXIT_FAILURE);
 	}
-	/* Á¤Á¦µÈ ¸®½ºÆ® ÆÄÀÏÀ» ÀĞµµ·Ï ¼³Á¤ */
+	/* ì •ì œëœ ë¦¬ìŠ¤íŠ¸ íŒŒì¼ì„ ì½ë„ë¡ ì„¤ì • */
+	refine_mal_site_list();
 	argv[1] = "refined_mal_list.txt";
 
 	blacklist = BlackListInit();
@@ -228,7 +228,7 @@ int __cdecl main(int argc, char **argv)
 		blockpage->header.tcp.AckNum =
 			htonl(ntohl(tcp_header->SeqNum) + payload_len);
 		WinDivertHelperCalcChecksums((PVOID)blockpage, blockpage_len, 0);
-		/*		// ÆäÀÌÁö ¸®´ÙÀÌ·ºÆ®
+		/*		// í˜ì´ì§€ ë¦¬ë‹¤ì´ë ‰íŠ¸
 		addr.Direction = !addr.Direction;     // Reverse direction.
 		if (!WinDivertSend(handle, (PVOID)blockpage, blockpage_len, &addr,
 		NULL))
@@ -418,7 +418,7 @@ static void BlackListRead(PBLACKLIST blacklist, const char *filename)
 				;
 			continue;
 		}
-		/* rul ÀúÀåµÈ °ÍÀ» Ãâ·ÂÇØÁÜ */
+		/* rul ì €ì¥ëœ ê²ƒì„ ì¶œë ¥í•´ì¤Œ */
 		//	printf("ADD %s/%s\n", domain, uri);
 
 		url = (PURL)malloc(sizeof(URL));
@@ -609,28 +609,31 @@ static int UrlMatch(PURL urla, PURL urlb)
 	return 0;
 }
 
-/* À¯ÇØ »çÀÌÆ® ¸®½ºÆ® Á¤Á¦  */
+/* ìœ í•´ ì‚¬ì´íŠ¸ ë¦¬ìŠ¤íŠ¸ ì •ì œ
+ì˜ˆë¥¼ ë“¤ì–´ http://www.gilgil.net ìœ¼ë¡œ í…ìŠ¤íŠ¸ íŒŒì¼ì„ ì €ì¥í•´ ë†“ì„ ë•Œ
+gilgil.netìœ¼ë¡œ ì ‘ì†í•˜ë©´ ë“¤ì–´ê°€ì§€ëŠ” ì˜¤ë¥˜ê°€ ìƒê²¨ë²„ë¦¬ëŠ” ë¬¸ì œ ë•Œë¬¸ì— ë§Œë“¬
+*/
 void refine_mal_site_list()
 {
-	FILE * fp;					// ÆÄÀÏ ºÒ·¯¿À±â Àü¿ë
-	FILE * wfp;					// ÆÄÀÏ ¾²±â Àü¿ë
+	FILE * fp;					// íŒŒì¼ ë¶ˆëŸ¬ì˜¤ê¸° ì „ìš©
+	FILE * wfp;					// íŒŒì¼ ì“°ê¸° ì „ìš©
 	unsigned char str[MAX];
 
-	unsigned char *check1 = "http://www.";		// ±æÀÌ : 11
-	unsigned char *check2 = "http://";			// ±æÀÌ : 7
+	unsigned char *check1 = "http://www.";		// ê¸¸ì´ : 11
+	unsigned char *check2 = "http://";			// ê¸¸ì´ : 7
 
 	if ((fp = fopen("mal_site.txt", "r")) == NULL)
 	{
 		puts("error");
 		exit(0);
 	}
-	wfp = fopen("refined_mal_list.txt", "w");	// http:// ÀÌ³ª www ¶§¹ö¸° ÁÖ¼ÒµéÀ» µû·Î ÀúÀå
-	fgets(str, MAX, fp);						// Ã³À½ ±ÛÀÚ°¡ ÀÚ²Ù ±úÁ®³ª¿Í¼­ ¹Ì¸® ÇÑ¹ø ºÒ·¯¿È
-	while (fgets(str, MAX, fp) != NULL)			// ÆÄÀÏÀÇ ³¡ÀÌ ³¯ ¶§±îÁö »ğÀÔ
+	wfp = fopen("refined_mal_list.txt", "w");	// http:// ì´ë‚˜ www ë•Œë²„ë¦° ì£¼ì†Œë“¤ì„ ë”°ë¡œ ì €ì¥
+	fgets(str, MAX, fp);						// ì²˜ìŒ ê¸€ìê°€ ìê¾¸ ê¹¨ì ¸ë‚˜ì™€ì„œ ë¯¸ë¦¬ í•œë²ˆ ë¶ˆëŸ¬ì˜´
+	while (fgets(str, MAX, fp) != NULL)			// íŒŒì¼ì˜ ëì´ ë‚  ë•Œê¹Œì§€ ì‚½ì…
 	{
-		if (!strncmp(str, check1, strlen(check1)))		// http://www. Çü½ÄÀÏ ¶§
+		if (!strncmp(str, check1, strlen(check1)))		// http://www. í˜•ì‹ì¼ ë•Œ
 			fprintf(wfp, "%s", str + strlen(check1));
-		else if (!strncmp(str, check2, strlen(check2)))	// http:// Çü½ÄÀÏ ¶§
+		else if (!strncmp(str, check2, strlen(check2)))	// http:// í˜•ì‹ì¼ ë•Œ
 			fprintf(wfp, "%s", str + strlen(check2));
 		else
 			printf("wrong site\n");
